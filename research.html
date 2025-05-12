@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GCC Modest Fashion Startup - Strategic Dashboard</title>
+    <style>
+        /* --- Base & Dark Mode Setup --- */
+        :root {
+            --bg-color: #1a1d24; /* Dark background */
+            --card-bg: #252a33; /* Slightly lighter card background */
+            --text-color: #e0e0e0; /* Light grey text */
+            --heading-color: #ffffff; /* White headings */
+            --accent-primary: #00aaff; /* Bright blue accent */
+            --accent-secondary: #00e6a7; /* Bright teal/green accent */
+            --accent-gradient: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
+            --border-color: #404858; /* Subtle border color */
+            --shadow-color: rgba(0, 170, 255, 0.1); /* Subtle glow effect */
+            --font-primary: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Clean font stack */
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth; /* Smooth scrolling for internal links if needed */
+        }
+
+        body {
+            font-family: var(--font-primary);
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.7;
+            overflow: hidden; /* Prevent body scroll, manage scrolling within slides if necessary */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        /* --- Slider Container --- */
+        .dashboard-slider {
+            width: 100%;
+            max-width: 1300px; /* Max width for large screens */
+            height: 80vh; /* Adjust height as needed */
+            max-height: 700px;
+            position: relative;
+            overflow: hidden;
+            background: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3), 0 0 15px var(--shadow-color);
+            display: flex; /* Use flex for internal alignment */
+        }
+
+        /* --- Individual Slides --- */
+        .slide {
+            min-width: 100%; /* Each slide takes full width */
+            height: 100%;
+            padding: 40px 50px;
+            opacity: 0;
+            visibility: hidden;
+            position: absolute;
+            top: 0;
+            left: 0;
+            transition: opacity 0.6s ease-in-out, visibility 0.6s ease-in-out;
+            overflow-y: auto; /* Allow scrolling within a slide if content overflows */
+            background-color: var(--card-bg); /* Ensure background for absolute positioning */
+        }
+
+        .slide.active-slide {
+            opacity: 1;
+            visibility: visible;
+            z-index: 1; /* Bring active slide to the front */
+        }
+
+        /* --- Slide Content Styling --- */
+        .slide-header {
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid;
+            border-image: var(--accent-gradient) 1;
+        }
+
+        .slide-header h2 {
+            color: var(--heading-color);
+            font-size: 2.2em; /* Larger heading */
+            font-weight: 600;
+        }
+         .slide-header .subtitle {
+            font-size: 1.1em;
+            color: var(--accent-secondary);
+            font-weight: 500;
+         }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* Responsive grid */
+            gap: 25px;
+            margin-top: 20px;
+        }
+
+        .data-card {
+            background-color: rgba(255, 255, 255, 0.03); /* Very subtle card background */
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .data-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3), 0 0 10px var(--shadow-color);
+        }
+
+        .data-card h3 {
+            color: var(--accent-primary);
+            font-size: 1.4em;
+            margin-bottom: 15px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 8px;
+        }
+
+         .data-card ul {
+            list-style: none; /* Remove default bullets */
+            padding-left: 0;
+         }
+         .data-card li {
+            margin-bottom: 12px;
+            position: relative;
+            padding-left: 25px; /* Space for custom bullet */
+         }
+         .data-card li::before { /* Custom bullet */
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 8px; /* Adjust vertical alignment */
+            width: 8px;
+            height: 8px;
+            background: var(--accent-secondary);
+            border-radius: 50%;
+         }
+
+        .data-card strong, .highlight {
+            color: var(--accent-secondary);
+            font-weight: 600;
+        }
+        .data-card .value {
+             color: var(--heading-color); /* Make values stand out */
+             font-weight: 700;
+        }
+        .data-card .label {
+             color: var(--text-color); /* Standard text for labels */
+        }
+
+        /* Tooltip Styling (using title attribute for simplicity) */
+        [title] {
+            /* Browser default styling will be used, usually adapts to dark mode */
+            /* For custom tooltips, more CSS/JS is needed */
+            border-bottom: 1px dotted var(--accent-primary); /* Indicate hoverable element */
+            cursor: help;
+        }
+
+        /* Table Styling */
+        table {
+            width: 100%;
+            border-collapse: separate; /* Use separate for border-radius */
+            border-spacing: 0;
+            margin: 20px 0;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            overflow: hidden; /* Clip content to border-radius */
+        }
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+        th {
+            background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03)); /* Subtle gradient header */
+            color: var(--heading-color);
+            font-weight: 600;
+        }
+        tbody tr {
+             background-color: rgba(255, 255, 255, 0.01); /* Very subtle row color */
+             transition: background-color 0.3s ease;
+        }
+        tbody tr:last-child td {
+            border-bottom: none; /* Remove border from last row */
+        }
+        tbody tr:hover {
+            background-color: rgba(0, 170, 255, 0.1); /* Highlight row on hover */
+        }
+
+        /* Chart Placeholder */
+        .chart-placeholder {
+            border: 2px dashed var(--border-color);
+            padding: 40px;
+            text-align: center;
+            color: #888; /* Lighter grey for placeholder text */
+            margin-top: 20px;
+            margin-bottom: 20px;
+            background-color: rgba(0,0,0,0.1);
+            border-radius: 8px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 200px;
+             font-style: italic;
+        }
+
+        /* --- Navigation Controls --- */
+        .slider-nav {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            background: rgba(0,0,0,0.3);
+            padding: 5px 10px;
+            border-radius: 25px;
+        }
+
+        .slider-nav button {
+            background: transparent;
+            border: none;
+            color: var(--heading-color);
+            font-size: 2em; /* Larger icons */
+            cursor: pointer;
+            padding: 0 15px;
+            transition: color 0.3s ease;
+        }
+
+        .slider-nav button:hover:not(:disabled) {
+            color: var(--accent-primary);
+        }
+
+        .slider-nav button:disabled {
+            color: #555; /* Greyed out disabled button */
+            cursor: not-allowed;
+        }
+
+        .slide-indicator {
+             font-size: 0.9em;
+             color: var(--text-color);
+             margin: 0 15px;
+             font-weight: 500;
+             min-width: 40px; /* Ensure space doesn't jump */
+             text-align: center;
+        }
+
+         /* --- Footer for final slide --- */
+         .final-notes {
+             margin-top: 30px;
+             padding-top: 20px;
+             border-top: 1px solid var(--border-color);
+             font-size: 0.95em;
+             color: #aaa; /* Lighter grey for footer notes */
+         }
+          .final-notes strong { color: var(--accent-primary); }
+
+
+        /* --- Responsive Adjustments --- */
+        @media (max-width: 768px) {
+            .dashboard-slider {
+                height: 90vh; /* More height on smaller screens */
+                max-height: none;
+                 border-radius: 0;
+            }
+            .slide {
+                padding: 25px 20px;
+            }
+            .slide-header h2 {
+                font-size: 1.8em;
+            }
+            .content-grid {
+                grid-template-columns: 1fr; /* Stack cards on small screens */
+            }
+             .slider-nav {
+                 bottom: 10px;
+             }
+             .slider-nav button {
+                 font-size: 1.6em;
+                 padding: 0 10px;
+             }
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="dashboard-slider">
+
+        <!-- Slide 1: Introduction -->
+        <div class="slide active-slide" id="slide-intro">
+            <div class="slide-header">
+                <h2>Launching a Premier Modest Fashion Brand for the GCC</h2>
+                <p class="subtitle">Strategic Framework & Key Considerations (India-Based Operations)</p>
+            </div>
+            <div class="content-grid">
+                <div class="data-card">
+                    <h3>Vision</h3>
+                    <p>To establish a leading Islamic modest fashion brand, designed and produced in India, capturing significant market share within the discerning UAE/GCC markets through superior quality, cultural resonance, and ethical practices.</p>
+                </div>
+                <div class="data-card">
+                    <h3>Target Market</h3>
+                    <p>Focus on digitally-savvy, fashion-conscious women in the UAE and broader GCC region seeking contemporary, high-quality modest wear that aligns with cultural values and climate needs.</p>
+                </div>
+                <div class="data-card">
+                    <h3>Core Pillars</h3>
+                    <ul>
+                        <li>Authentic Design & Cultural Fit</li>
+                        <li>Optimized Indian Supply Chain</li>
+                        <li>Agile Financial & Logistics Strategy</li>
+                        <li>Targeted Digital Marketing</li>
+                        <li>Robust Risk Mitigation</li>
+                    </ul>
+                </div>
+            </div>
+             <div class="chart-placeholder" style="margin-top: 40px;">
+                Visual Area: Maybe a stylized map showing India-GCC connection or brand mood board elements.
+             </div>
+        </div>
+
+        <!-- Slide 2: HR & Partnerships -->
+        <div class="slide" id="slide-hr">
+            <div class="slide-header">
+                 <h2>Leveraging Talent & Strategic Alliances</h2>
+                 <p class="subtitle">Building a Skilled Team and Network</p>
+            </div>
+            <div class="content-grid">
+                <div class="data-card">
+                    <h3>Freelance Design Talent</h3>
+                    <ul>
+                        <li><span class="label">Platforms:</span> <span class="value" title="Avg. $40-50/hr for relevant Indian talent [1][3]">Upwork</span>, <span class="value" title="Potential 50% cost saving vs full-time [5]">Truelancer</span>, <span class="value" title="Direct access to specialized designers like Vrinda Pandey [4]">Instagram</span></li>
+                        <li><span class="label">Compensation:</span> Proposed <span class="value" title="Aligns incentives, manages upfront cost">15% Upfront + 10% Profit Share</span> model</li>
+                        <li><span class="label">Legal:</span> Governed by <span class="value" title="Ensures cross-border enforceability">Indian Contract Act & UAE Laws</span></li>
+                    </ul>
+                </div>
+                <div class="data-card">
+                    <h3>Institutional Partnerships</h3>
+                    <ul>
+                        <li><span class="label">Design Input:</span> <span class="value" title="Access to specialized hijab drafting modules, 22% alumni in Gulf">Crescent College Chennai</span></li>
+                        <li><span class="label">Material R&D:</span> <span class="value" title="Focus on Halal-certified textiles">NIFT Mumbai (Islamic Textiles Lab)</span></li>
+                    </ul>
+                </div>
+                 <div class="data-card">
+                     <h3>Key Skill Areas</h3>
+                     <ul>
+                         <li>Modest Wear Pattern Making & CAD</li>
+                         <li>Textile Knowledge (Climate Appropriate)</li>
+                         <li>GCC Market Trend Analysis</li>
+                         <li>Digital Marketing (GCC Focus)</li>
+                         <li>Cross-border Logistics</li>
+                     </ul>
+                 </div>
+            </div>
+        </div>
+
+        <!-- Slide 3: Material Sourcing -->
+        <div class="slide" id="slide-sourcing">
+            <div class="slide-header">
+                <h2>Optimizing Material Sourcing from India</h2>
+                <p class="subtitle">Balancing Cost, Quality, and Sustainability</p>
+            </div>
+             <div class="data-card">
+                 <h3>Cost Comparison: India vs. Imports</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Parameter (per meter)</th>
+                            <th title="Sourced from Surat/Tiruppur hubs">India Cost (Est.)</th>
+                            <th title="Sourced from China/Turkey">Import Cost (Est.)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Chiffon</td>
+                            <td><span class="value">₹85-110 ($1-1.3)</span></td>
+                            <td>$2.1-2.8</td>
+                        </tr>
+                        <tr>
+                            <td>Georgette</td>
+                            <td><span class="value">₹95-125 ($1.1-1.5)</span></td>
+                            <td>$2.4-3.2</td>
+                        </tr>
+                         <tr>
+                            <td title="Chemical treatment for GCC climate comfort">Wrinkle-free Finish</td>
+                            <td><span class="value">~₹18 ($0.22)</span></td>
+                            <td>~₹25 ($0.30)</td>
+                        </tr>
+                    </tbody>
+                </table>
+                 <small><em>Source: Textile Association of India 2024 Wholesale Report (Illustrative)</em></small>
+            </div>
+            <div class="content-grid">
+                <div class="data-card">
+                    <h3>Sustainable Alternatives</h3>
+                    <ul>
+                        <li><span class="label">Tencel™ Chiffon:</span> <span class="value" title="Oeko-Tex certified, biodegradable">~₹220/m ($2.6)</span></li>
+                        <li><span class="label">Organic Mulberry Silk:</span> <span class="value" title="Meets SASO Halal standards, premium feel">~₹1,850/m ($22)</span></li>
+                        <li><span class="label">Focus:</span> Prioritize suppliers with <span class="value" title="Ensures ethical and environmental standards">Oeko-Tex, GOTS, or Halal certs</span>.</li>
+                    </ul>
+                </div>
+                <div class="data-card">
+                    <h3>Sourcing Hubs</h3>
+                    <ul>
+                        <li><span class="label">Surat:</span> Strong in <span class="value">synthetic fabrics</span> (chiffon, georgette).</li>
+                        <li><span class="label">Tiruppur:</span> Known for <span class="value">knits and cotton</span>.</li>
+                        <li><span class="label">Strategy:</span> Develop relationships with <span class="value">2-3 key suppliers</span> per fabric type for resilience.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+         <!-- Slide 4: Production Economics -->
+        <div class="slide" id="slide-production">
+            <div class="slide-header">
+                 <h2>Production Economics & Efficiency</h2>
+                 <p class="subtitle">Comparative Analysis of Indian Manufacturing Hubs</p>
+            </div>
+            <div class="content-grid">
+                 <div class="data-card">
+                     <h3>Labor Cost Comparison (Per Garment - Est.)</h3>
+                     <ul>
+                         <li><span class="label" title="Skilled Muslim workforce, relevant for modest wear">Malappuram (Kerala):</span> <span class="value">~₹180 ($2.16)</span></li>
+                         <li><span class="label" title="Expertise in bulk embroidery">Moradabad (UP):</span> <span class="value">~₹150 ($1.80)</span></li>
+                         <li><span class="label" title="Tech-driven facilities, potentially higher QC">Hyderabad (Telangana):</span> <span class="value">~₹210 ($2.52)</span></li>
+                         <li><span class="label">Decision Factor:</span> Balance cost with <span class="value">skill specialization and quality control</span> needs.</li>
+                     </ul>
+                 </div>
+                 <div class="data-card">
+                     <h3>Operational Benchmarks</h3>
+                     <ul>
+                         <li><span class="label">MOQ (Ethical Factories):</span> <span class="value" title="Minimum run approx ₹85k / $1,020">100-200 units/design</span></li>
+                         <li><span class="label">Machinery (Juki DDL-8700):</span> AMC <span class="value">~₹12.5k/yr ($150)</span></li>
+                         <li><span class="label">vs. Manual Labor:</span> Cost <span class="value">~₹8.4k/yr ($100) per operator</span> (Excludes benefits, training)</li>
+                         <li><span class="label">Focus:</span> Prioritize factories with <span class="value" title="Ensures fair labor and quality standards">ethical certifications (e.g., Sedex, SA8000)</span>.</li>
+                     </ul>
+                 </div>
+            </div>
+             <div class="chart-placeholder">
+                 Chart Area: Bar chart comparing labor costs across Kerala, UP, Telangana. Highlight key skill differences.
+             </div>
+        </div>
+
+         <!-- Slide 5: Trade Finance & Logistics -->
+        <div class="slide" id="slide-logistics">
+            <div class="slide-header">
+                 <h2>Navigating Trade Finance & Logistics</h2>
+                 <p class="subtitle">Optimizing Costs and Flow from India to GCC</p>
+            </div>
+             <div class="content-grid">
+                 <div class="data-card">
+                     <h3>Financial Tools & Incentives</h3>
+                     <ul>
+                         <li><span class="label">TUFS Subsidy (India):</span> <span class="value" title="On eligible machinery purchase over ₹2M ($24k)">15% credit reimbursement</span></li>
+                         <li><span class="label">Export Finance:</span> Explore options via <span class="value" title="Offers pre/post-shipment credit">EXIM Bank India</span>.</li>
+                         <li><span class="label">Payment Terms:</span> Secure favorable terms (e.g., <span class="value" title="Letter of Credit reduces payment risk">LC</span>) with GCC buyers/platforms.</li>
+                     </ul>
+                 </div>
+                 <div class="data-card">
+                     <h3>Shipping & Landed Costs</h3>
+                     <ul>
+                         <li><span class="label">Shipping Cost (Mundra to Dubai):</span> CIF approx. <span class="value">$1.2/kg</span> vs FOB approx. <span class="value">$0.85/kg</span></li>
+                         <li><span class="label">Key Added Costs (UAE):</span> <span class="value" title="Standard Value Added Tax">5% VAT</span> + <span class="value" title="Fees for clearing goods">~2.1% Customs Clearance</span></li>
+                         <li><span class="label">Potential Hidden Costs:</span>
+                             <ul>
+                                 <li>Dnata Storage: <span class="value" title="After 7-day free period, ~$3.4/m³">AED 12.5/m³</span></li>
+                                 <li>Red Sea Rerouting: <span class="value" title="Via Cape of Good Hope, if applicable">~$480/TEU surcharge</span></li>
+                             </ul>
+                         </li>
+                     </ul>
+                 </div>
+             </div>
+             <div class="chart-placeholder">
+                 Chart/Diagram Area: Flowchart showing logistics path from India factory -> Port -> Shipping -> Dubai Customs -> Warehouse -> Customer. Highlight cost points.
+             </div>
+        </div>
+
+         <!-- Slide 6: Competitive Landscape -->
+        <div class="slide" id="slide-competition">
+            <div class="slide-header">
+                 <h2>Understanding the Competitive Arena</h2>
+                 <p class="subtitle">Positioning Against Key GCC Players</p>
+            </div>
+              <div class="data-card">
+                 <h3>Benchmarking & Price Positioning</h3>
+                 <table>
+                    <thead>
+                        <tr>
+                            <th>Segment / Platform</th>
+                            <th>Avg. Abaya Price / Fee</th>
+                            <th title="Estimated gross margin structure or platform take-rate">Margin/Fee Structure</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Modanisa (Mid-Market)</td>
+                            <td><span class="value">$89-120</span></td>
+                            <td>~55% wholesale markup (Est.)</td>
+                        </tr>
+                        <tr>
+                            <td>Shatha Essa (Luxury)</td>
+                            <td><span class="value">$420-600</span></td>
+                            <td>~68% luxury premium (Est.)</td>
+                        </tr>
+                         <tr>
+                            <td>Souq.com (Amazon.ae)</td>
+                            <td><span class="value">~22%</span></td>
+                            <td>Platform commission</td>
+                         </tr>
+                         <tr>
+                            <td>Namshi</td>
+                            <td><span class="value">~18% + 3.5%</span></td>
+                            <td>Platform + Payment Gateway fees</td>
+                        </tr>
+                    </tbody>
+                </table>
+             </div>
+             <div class="content-grid">
+                 <div class="data-card">
+                     <h3>Influencer Marketing Impact</h3>
+                     <ul>
+                         <li><span class="label">@abayabuth:</span> <span class="value" title="High engagement suggests strong audience connection">8.7% Engagement Rate</span> (Reported 11% conversion)</li>
+                         <li><span class="label">@hijabhills:</span> <span class="value" title="Cost per click indicates ad efficiency during peak times">$1.2 CPC</span> on Eid campaigns</li>
+                         <li><span class="label">Strategy:</span> Partner with <span class="value">micro/macro influencers</span> aligned with brand aesthetics & values. Track ROI meticulously.</li>
+                     </ul>
+                 </div>
+                 <div class="data-card">
+                     <h3>Key Differentiators</h3>
+                     <ul>
+                         <li>Focus on <span class="value">Indian craftsmanship</span> & unique textiles.</li>
+                         <li>Emphasis on <span class="value">sustainable/Halal</span> materials.</li>
+                         <li>Offer <span class="value">semi-customization</span> options.</li>
+                         <li>Provide <span class="value">superior customer service</span> across borders.</li>
+                     </ul>
+                 </div>
+             </div>
+        </div>
+
+         <!-- Slide 7: Market Validation -->
+        <div class="slide" id="slide-market">
+            <div class="slide-header">
+                 <h2>Validating Market Fit & Preferences</h2>
+                 <p class="subtitle">Aligning Product with GCC Consumer Nuances</p>
+            </div>
+             <div class="content-grid">
+                 <div class="data-card">
+                     <h3>Regional Color & Style Preferences</h3>
+                     <ul>
+                         <li><span class="label">UAE Trend:</span> <span class="value" title="e.g., Pantone 14-1020TCX Mint, 16-3909TCX Fog">~63% Pastel Adoption</span></li>
+                         <li><span class="label">KSA Trend:</span> <span class="value" title="e.g., #4F4A3D Taupe dominates ~41% of premium lines">Earth Tones Strong</span></li>
+                         <li><span class="label">Design Note:</span> Incorporate subtle embroidery/embellishments preferred in the region.</li>
+                         <li><span class="label">Action:</span> Conduct ongoing <span class="value">social listening & trend analysis</span>.</li>
+                     </ul>
+                 </div>
+                 <div class="data-card">
+                     <h3>Sizing & Seasonal Planning</h3>
+                     <ul>
+                         <li><span class="label">Sizing Adjustment:</span> Add <span class="value" title="Accommodates regional differences (Gulf BMI 28-31 vs India 23-26)">+5cm Waist Ease</span> vs. standard Indian patterns.</li>
+                         <li><span class="label">Key Season:</span> Ramadan/Eid requires peak inventory.</li>
+                         <li><span class="label">Production Lead Time:</span> <span class="value highlight" title="Crucial for on-time delivery for Ramadan">~26 Weeks</span> (Mandates Feb fabric procurement).</li>
+                         <li><span class="label">Strategy:</span> Develop a detailed <span class="value">6-month rolling forecast</span> & production calendar.</li>
+                     </ul>
+                 </div>
+             </div>
+              <div class="chart-placeholder">
+                 Chart Area: Pie charts showing color palette distribution for UAE vs KSA. Maybe a timeline graphic for Ramadan planning.
+             </div>
+        </div>
+
+         <!-- Slide 8: Risk Mitigation -->
+        <div class="slide" id="slide-risk">
+            <div class="slide-header">
+                 <h2>Proactive Risk Management</h2>
+                 <p class="subtitle">Addressing Potential Challenges</p>
+            </div>
+              <div class="content-grid">
+                 <div class="data-card">
+                     <h3>Supply Chain & Financial Risks</h3>
+                     <ul>
+                         <li><span class="label">Commodity Price Volatility:</span> Hedge cotton via <span class="value" title="MCX April 2025 futures at ~₹58,300/candy, ↑14% YoY">6-month forward contracts</span>.</li>
+                         <li><span class="label">Logistics Disruptions:</span> Identify <span class="value" title="e.g., Air freight, alternative sea routes">alternative shipping routes</span> & carriers (monitor Red Sea situation).</li>
+                          <li><span class="label">Currency Fluctuation:</span> Use <span class="value">INR/AED hedging instruments</span> if exposure is significant.</li>
+                     </ul>
+                 </div>
+                 <div class="data-card">
+                     <h3>Compliance & Operational Risks</h3>
+                     <ul>
+                         <li><span class="label">Halal Compliance:</span> Budget <span class="value" title="Covers ESMA/SASO audits">~₹1.2L ($1,440)</span> + <span class="value" title="Estimated overhead for compliance processes">3.5% production overhead</span>. Maintain meticulous records.</li>
+                         <li><span class="label">Quality Control Failures:</span> Implement <span class="value">multi-stage QC checks</span> (fabric, cutting, stitching, finishing).</li>
+                         <li><span class="label">Intellectual Property:</span> Register <span class="value">brand name and key designs</span> in target markets.</li>
+                     </ul>
+                 </div>
+                 <div class="data-card">
+                     <h3>Contingency Planning</h3>
+                     <ul>
+                         <li>Maintain <span class="value">buffer stock</span> for best-selling core items.</li>
+                         <li>Develop relationships with <span class="value">backup suppliers</span> for critical materials.</li>
+                         <li>Have a <span class="value">crisis communication plan</span> ready.</li>
+                     </ul>
+                 </div>
+             </div>
+        </div>
+
+         <!-- Slide 9: Technology Integration -->
+        <div class="slide" id="slide-tech">
+            <div class="slide-header">
+                 <h2>Leveraging Technology for Competitive Edge</h2>
+                 <p class="subtitle">Integrating Digital Tools Across the Value Chain</p>
+            </div>
+             <div class="content-grid">
+                 <div class="data-card">
+                     <h3>Design & Production Tech</h3>
+                     <ul>
+                         <li><span class="label">3D Pattern Making (Optitex):</span> <span class="value" title="vs. Manual Grading at ~₹1.8L/$2,160 per designer/yr">~₹2.75L/yr ($3,300)</span> - Improves fit, reduces samples.</li>
+                         <li><span class="label">Benefits:</span> Faster prototyping, better visualization, potential material savings.</li>
+                     </ul>
+                 </div>
+                 <div class="data-card">
+                     <h3>Supply Chain & Customer Experience</h3>
+                     <ul>
+                         <li><span class="label">Blockchain Transparency:</span> <span class="value" title="e.g., via VeChain partnership">~₹18-22/garment</span> for traceability (enhances ethical claims).</li>
+                         <li><span class="label">AR Fitting Rooms (SDK):</span> Initial Setup <span class="value" title="e.g., Using platforms like 8Secondz">$10k-$15k</span> - Enhances online conversion, reduces returns.</li>
+                          <li><span class="label">Inventory Management:</span> Cloud-based system for <span class="value">real-time stock visibility</span> across channels.</li>
+                     </ul>
+                 </div>
+                 <div class="data-card">
+                     <h3>Marketing & Sales Tech</h3>
+                     <ul>
+                         <li><span class="label">CRM Platform:</span> Manage customer interactions & targeted marketing.</li>
+                         <li><span class="label">Social Analytics Tools:</span> Track campaign performance & market trends.</li>
+                         <li><span class="label">E-commerce Platform:</span> Scalable solution (e.g., Shopify, Magento) with GCC localization.</li>
+                     </ul>
+                 </div>
+             </div>
+        </div>
+
+        <!-- Slide 10: Growth Opportunities & Financials -->
+        <div class="slide" id="slide-opportunity">
+            <div class="slide-header">
+                 <h2>Future Growth & Financial Outlook</h2>
+                 <p class="subtitle">Exploring New Avenues and Key Metrics</p>
+            </div>
+            <div class="content-grid">
+                 <div class="data-card">
+                     <h3>Unconventional Opportunity: Rental</h3>
+                     <ul>
+                         <li><span class="label">Target Market:</span> Kuwait's rental abaya market.</li>
+                         <li><span class="label">Growth Potential:</span> Estimated <span class="value highlight">17% CAGR</span>.</li>
+                         <li><span class="label">Pilot Model:</span> Subscription at <span class="value" title="Includes 3 pieces rotated periodically">~$69/month</span>.</li>
+                         <li><span class="label">Considerations:</span> Logistics of returns, cleaning, inventory management for rentals.</li>
+                     </ul>
+                 </div>
+                 <div class="data-card">
+                     <h3>Key Financial Projections (Targets)</h3>
+                     <ul>
+                         <li><span class="label">Gross Margin:</span> Target <span class="value">38%</span></li>
+                         <li><span class="label">Operating Expenses:</span> Target <span class="value">22%</span> of Revenue</li>
+                         <li><span class="label">Breakeven Horizon:</span> Aim for <span class="value">18 Months</span></li>
+                         <li><span class="label">Funding Ask:</span> [Placeholder: Specify funding amount needed and use]</li>
+                     </ul>
+                 </div>
+            </div>
+             <div class="chart-placeholder">
+                 Chart Area: Projected Revenue Growth Curve, Breakeven Analysis Chart.
+             </div>
+             <div class="final-notes">
+                 <p><strong>Data Validation:</strong> Assumes cross-validation with DGFT Export Data, Dubai Customs Regs, Market Reports.</p>
+                 <p><strong>Next Steps:</strong> Secure seed funding, finalize supplier agreements, develop detailed launch marketing plan, recruit key personnel.</p>
+             </div>
+        </div>
+
+
+        <!-- Navigation -->
+        <div class="slider-nav">
+            <button id="prevSlide" title="Previous Slide"><</button>
+            <span class="slide-indicator" id="indicator">1 / 10</span>
+            <button id="nextSlide" title="Next Slide">></button>
+        </div>
+
+    </div> <!-- end dashboard-slider -->
+
+    <script>
+        // Simple JavaScript for Slider Functionality
+        const slides = document.querySelectorAll('.slide');
+        const prevButton = document.getElementById('prevSlide');
+        const nextButton = document.getElementById('nextSlide');
+        const indicator = document.getElementById('indicator');
+        const totalSlides = slides.length;
+        let currentSlideIndex = 0;
+
+        function showSlide(index) {
+            // Hide current slide
+            slides[currentSlideIndex].classList.remove('active-slide');
+
+            // Update index
+            currentSlideIndex = index;
+
+            // Show new slide
+            slides[currentSlideIndex].classList.add('active-slide');
+
+            // Update indicator
+            indicator.textContent = `${currentSlideIndex + 1} / ${totalSlides}`;
+
+            // Update button states
+            prevButton.disabled = currentSlideIndex === 0;
+            nextButton.disabled = currentSlideIndex === totalSlides - 1;
+        }
+
+        // Event Listeners
+        prevButton.addEventListener('click', () => {
+            if (currentSlideIndex > 0) {
+                showSlide(currentSlideIndex - 1);
+            }
+        });
+
+        nextButton.addEventListener('click', () => {
+            if (currentSlideIndex < totalSlides - 1) {
+                showSlide(currentSlideIndex + 1);
+            }
+        });
+
+        // Keyboard navigation (optional)
+        document.addEventListener('keydown', (event) => {
+             if (event.key === 'ArrowLeft') {
+                 if (currentSlideIndex > 0) {
+                    showSlide(currentSlideIndex - 1);
+                 }
+             } else if (event.key === 'ArrowRight') {
+                  if (currentSlideIndex < totalSlides - 1) {
+                    showSlide(currentSlideIndex + 1);
+                  }
+             }
+        });
+
+
+        // Initial setup
+        showSlide(0); // Show the first slide initially
+
+    </script>
+
+</body>
+</html>
